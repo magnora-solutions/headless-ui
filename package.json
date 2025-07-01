@@ -1,0 +1,11 @@
+{
+  "name": "magnora-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "magnora-test"
+  ],
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

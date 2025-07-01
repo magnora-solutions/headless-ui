@@ -1,0 +1,22 @@
+{
+  "name": "@magnora/headlessui-react",
+  "version": "1.0.0",
+  "main": "index.js",
+  "types": "src/index.ts",
+  "files": [
+    "src",
+    "index.js",
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "dependencies": {
+    "@react-aria/interactions": "^3.15.0"
+  }
+}
