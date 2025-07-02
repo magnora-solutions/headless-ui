@@ -1,0 +1,25 @@
+{
+  "hash": "f34b1793",
+  "configHash": "42182a73",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "e210010b",
+  "optimized": {
+    "@react-aria/interactions": {
+      "src": "../../packages/@magnora/headlessui-react/node_modules/@react-aria/interactions/dist/import.mjs",
+      "file": "@react-aria_interactions.js",
+      "fileHash": "7909b3ab",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../packages/@magnora/headlessui-react/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "e14e0c41",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-PE6CUOFC": {
+      "file": "chunk-PE6CUOFC.js"
+    }
+  }
+}

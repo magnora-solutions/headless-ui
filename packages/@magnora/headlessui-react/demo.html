@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Magnora Headless UI - Interactive Demo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+        }
+        
+        /* Basic headless component styling for demo */
+        [data-magnora-button] {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        [data-magnora-button][data-variant="primary"] {
+            background: #0d6efd;
+            color: white;
+        }
+        
+        [data-magnora-button][data-variant="primary"]:hover {
+            background: #0b5ed7;
+        }
+        
+        [data-magnora-button][data-variant="secondary"] {
+            background: #6c757d;
+            color: white;
+        }
+        
+        [data-magnora-button][data-variant="secondary"]:hover {
+            background: #5c636a;
+        }
+        
+        [data-magnora-button][data-variant="ghost"] {
+            background: transparent;
+            color: #0d6efd;
+            border: 1px solid #dee2e6;
+        }
+        
+        [data-magnora-button][data-variant="ghost"]:hover {
+            background: #f8f9fa;
+        }
+        
+        [data-magnora-button][data-disabled="true"] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        [data-magnora-button][data-loading="true"] {
+            opacity: 0.7;
+            cursor: wait;
+        }
+        
+        [data-magnora-card] {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        [data-magnora-card-header] {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        [data-magnora-card-content] {
+            padding: 20px 24px;
+        }
+        
+        [data-magnora-card-title] {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 8px;
+            color: #212529;
+        }
+        
+        [data-magnora-card-description] {
+            color: #6c757d;
+            margin: 0;
+        }
+        
+        [data-magnora-star] {
+            width: 20px;
+            height: 20px;
+            color: #ffc107;
+            margin-right: 2px;
+        }
+        
+        [data-magnora-star][data-filled="false"] {
+            color: #e9ecef;
+        }
+        
+        [data-magnora-stars] {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        [data-magnora-rating] {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        [data-magnora-rating-count] {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        [data-magnora-review] {
+            display: flex;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        [data-magnora-review]:last-child {
+            border-bottom: none;
+        }
+        
+        [data-magnora-review-avatar] {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        [data-magnora-review-author] {
+            font-weight: 600;
+            color: #212529;
+            margin: 0 0 4px;
+        }
+        
+        [data-magnora-review-title] {
+            font-weight: 500;
+            color: #495057;
+            margin: 0 0 8px;
+        }
+        
+        [data-magnora-review-content] {
+            color: #6c757d;
+            line-height: 1.5;
+            margin: 8px 0;
+        }
+        
+        [data-magnora-review-date] {
+            font-size: 14px;
+            color: #adb5bd;
+            margin: 8px 0;
+        }
+        
+        [data-magnora-review-actions] {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        
+        [data-magnora-form-field] {
+            margin-bottom: 16px;
+        }
+        
+        [data-magnora-form-label] {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #212529;
+        }
+        
+        [data-magnora-form-input],
+        [data-magnora-form-textarea] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+        
+        [data-magnora-form-input]:focus,
+        [data-magnora-form-textarea]:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+        }
+        
+        [data-magnora-form-error] {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        // Mock React Aria hooks for demo
+        const usePress = ({ onPress }) => ({
+            pressProps: {
+                onClick: onPress,
+                onKeyDown: (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onPress?.(e);
+                    }
+                }
+            }
+        });
+        
+        const useHover = ({ onHoverStart, onHoverEnd }) => ({
+            hoverProps: {
+                onMouseEnter: onHoverStart,
+                onMouseLeave: onHoverEnd
+            }
+        });
+        
+        const useFocus = ({ onFocus, onBlur }) => ({
+            focusProps: {
+                onFocus,
+                onBlur
+            }
+        });
+
+        // Mock components (simplified versions for demo)
+        const MagnoraProvider = ({ children, config }) => {
+            return React.createElement('div', null, children);
+        };
+
+        const Button = ({ children, variant = 'primary', size = 'md', onPress, isDisabled, isLoading, ...props }) => {
+            const { pressProps } = usePress({ onPress: isDisabled ? undefined : onPress });
+            
+            return React.createElement('button', {
+                ...pressProps,
+                'data-magnora-button': true,
+                'data-variant': variant,
+                'data-size': size,
+                'data-disabled': isDisabled,
+                'data-loading': isLoading,
+                disabled: isDisabled || isLoading,
+                ...props
+            }, isLoading ? 'Loading...' : children);
+        };
+
+        const Card = ({ children, style, ...props }) => {
+            return React.createElement('div', {
+                'data-magnora-card': true,
+                style,
+                ...props
+            }, children);
+        };
+
+        const CardHeader = ({ children, ...props }) => {
+            return React.createElement('div', {
+                'data-magnora-card-header': true,
+                ...props
+            }, children);
+        };
+
+        const CardContent = ({ children, ...props }) => {
+            return React.createElement('div', {
+                'data-magnora-card-content': true,
+                ...props
+            }, children);
+        };
+
+        const CardTitle = ({ children, ...props }) => {
+            return React.createElement('h3', {
+                'data-magnora-card-title': true,
+                ...props
+            }, children);
+        };
+
+        const CardDescription = ({ children, ...props }) => {
+            return React.createElement('p', {
+                'data-magnora-card-description': true,
+                ...props
+            }, children);
+        };
+
+        const RatingContext = React.createContext({});
+        
+        const Rating = ({ children, value, onChange }) => {
+            return React.createElement(RatingContext.Provider, {
+                value: { value, onChange, readonly: false }
+            }, React.createElement('div', {
+                'data-magnora-rating': true
+            }, children));
+        };
+
+        const RatingDisplay = ({ children, value }) => {
+            return React.createElement(RatingContext.Provider, {
+                value: { value, readonly: true }
+            }, React.createElement('div', {
+                'data-magnora-rating': true
+            }, children));
+        };
+
+        const Stars = ({ children, precision = 1 }) => {
+            return React.createElement('div', {
+                'data-magnora-stars': true
+            }, children);
+        };
+
+        const Star = ({ value }) => {
+            const { value: ratingValue, onChange, readonly } = React.useContext(RatingContext);
+            const filled = value <= ratingValue;
+            
+            const { pressProps } = usePress({
+                onPress: readonly ? undefined : () => onChange?.(value)
+            });
+
+            return React.createElement('span', {
+                ...(!readonly ? pressProps : {}),
+                'data-magnora-star': true,
+                'data-filled': filled,
+                style: { cursor: readonly ? 'default' : 'pointer' }
+            }, filled ? '★' : '☆');
+        };
+
+        const RatingCount = ({ children }) => {
+            return React.createElement('span', {
+                'data-magnora-rating-count': true
+            }, children);
+        };
+
+        const Review = ({ children }) => {
+            return React.createElement('div', {
+                'data-magnora-review': true
+            }, children);
+        };
+
+        const ReviewAvatar = ({ src, alt }) => {
+            return React.createElement('img', {
+                'data-magnora-review-avatar': true,
+                src,
+                alt
+            });
+        };
+
+        const ReviewAuthor = ({ children }) => {
+            return React.createElement('div', {
+                'data-magnora-review-author': true
+            }, children);
+        };
+
+        const ReviewTitle = ({ children }) => {
+            return React.createElement('div', {
+                'data-magnora-review-title': true
+            }, children);
+        };
+
+        const ReviewContent = ({ children }) => {
+            return React.createElement('div', {
+                'data-magnora-review-content': true
+            }, children);
+        };
+
+        const ReviewDate = ({ children }) => {
+            return React.createElement('div', {
+                'data-magnora-review-date': true
+            }, children);
+        };
+
+        const ReviewRating = ({ children }) => {
+            return React.createElement('div', {
+                style: { margin: '4px 0' }
+            }, children);
+        };
+
+        const ReviewActions = ({ children }) => {
+            return React.createElement('div', {
+                'data-magnora-review-actions': true
+            }, children);
+        };
+
+        const ReviewHelpfulButton = ({ children, onPress }) => {
+            return React.createElement(Button, {
+                variant: 'ghost',
+                size: 'sm',
+                onPress
+            }, children);
+        };
+
+        const ReviewsList = ({ children }) => {
+            return React.createElement('div', null, children);
+        };
+
+        const ReviewsListHeader = ({ children }) => {
+            return React.createElement('div', {
+                style: { marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #dee2e6' }
+            }, children);
+        };
+
+        const ReviewsListItems = ({ children }) => {
+            return React.createElement('div', null, children);
+        };
+
+        const ReviewForm = ({ children, onSubmit }) => {
+            const [formData, setFormData] = React.useState({});
+            const [errors, setErrors] = React.useState({});
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const data = new FormData(form);
+                const reviewData = Object.fromEntries(data.entries());
+                
+                // Simple validation
+                const newErrors = {};
+                if (!reviewData.name) newErrors.name = 'Name is required';
+                if (!reviewData.email) newErrors.email = 'Email is required';
+                if (!reviewData.title) newErrors.title = 'Title is required';
+                if (!reviewData.content) newErrors.content = 'Review content is required';
+                if (!reviewData.rating) newErrors.rating = 'Rating is required';
+                
+                setErrors(newErrors);
+                
+                if (Object.keys(newErrors).length === 0) {
+                    onSubmit(reviewData);
+                    form.reset();
+                    alert('Review submitted successfully!');
+                }
+            };
+
+            return React.createElement('form', {
+                onSubmit: handleSubmit
+            }, children);
+        };
+
+        const ReviewFormField = ({ children }) => {
+            return React.createElement('div', {
+                'data-magnora-form-field': true
+            }, children);
+        };
+
+        const ReviewFormLabel = ({ children, htmlFor }) => {
+            return React.createElement('label', {
+                'data-magnora-form-label': true,
+                htmlFor
+            }, children);
+        };
+
+        const ReviewFormInput = ({ name, type = 'text', required, placeholder, id }) => {
+            return React.createElement('input', {
+                'data-magnora-form-input': true,
+                name,
+                type,
+                required,
+                placeholder,
+                id
+            });
+        };
+
+        const ReviewFormTextarea = ({ name, required, placeholder, rows, id }) => {
+            return React.createElement('textarea', {
+                'data-magnora-form-textarea': true,
+                name,
+                required,
+                placeholder,
+                rows,
+                id
+            });
+        };
+
+        const ReviewFormRatingInput = ({ name, required }) => {
+            const [value, setValue] = React.useState(0);
+            
+            return React.createElement('div', null,
+                React.createElement('input', {
+                    type: 'hidden',
+                    name,
+                    value,
+                    required
+                }),
+                React.createElement(Rating, {
+                    value,
+                    onChange: setValue
+                },
+                    React.createElement(Stars, null,
+                        [1, 2, 3, 4, 5].map(val => 
+                            React.createElement(Star, { key: val, value: val })
+                        )
+                    )
+                )
+            );
+        };
+
+        const ReviewFormSubmit = ({ children }) => {
+            return React.createElement(Button, {
+                type: 'submit',
+                variant: 'primary'
+            }, children);
+        };
+
+        // Demo App Component
+        function DemoApp() {
+            const [currentRating, setCurrentRating] = React.useState(0);
+            const [reviews, setReviews] = React.useState([
+                {
+                    id: '1',
+                    author: 'John Doe',
+                    avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=0d6efd&color=fff',
+                    title: 'Amazing product!',
+                    content: 'This product exceeded my expectations. Highly recommended!',
+                    rating: 5,
+                    date: '2025-01-15',
+                    helpful: 12,
+                    verified: true
+                },
+                {
+                    id: '2', 
+                    author: 'Jane Smith',
+                    avatar: 'https://ui-avatars.com/api/?name=Jane+Smith&background=6c757d&color=fff',
+                    title: 'Good value for money',
+                    content: 'Solid product with great features. Worth the purchase.',
+                    rating: 4,
+                    date: '2025-01-10',
+                    helpful: 8,
+                    verified: false
+                }
+            ]);
+
+            const handleNewReview = (reviewData) => {
+                const newReview = {
+                    id: Date.now().toString(),
+                    author: reviewData.name,
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewData.name)}&background=198754&color=fff`,
+                    title: reviewData.title,
+                    content: reviewData.content,
+                    rating: parseInt(reviewData.rating),
+                    date: new Date().toISOString().split('T')[0],
+                    helpful: 0,
+                    verified: false
+                };
+                setReviews(prev => [newReview, ...prev]);
+            };
+
+            return React.createElement(MagnoraProvider, {
+                config: { 
+                    apiKey: 'demo-key', 
+                    shopDomain: 'demo-shop.myshopify.com' 
+                }
+            },
+                React.createElement('div', {
+                    style: { 
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        maxWidth: '1200px',
+                        margin: '0 auto',
+                        padding: '20px',
+                        backgroundColor: '#f8f9fa'
+                    }
+                },
+                    // Header
+                    React.createElement('header', {
+                        style: { textAlign: 'center', marginBottom: '40px' }
+                    },
+                        React.createElement('h1', {
+                            style: { color: '#212529', marginBottom: '10px' }
+                        }, '🚀 Magnora Headless UI Demo'),
+                        React.createElement('p', {
+                            style: { color: '#6c757d', fontSize: '18px' }
+                        }, 'Interactive demonstration of all components')
+                    ),
+
+                    // Rating Components Section
+                    React.createElement(Card, { style: { marginBottom: '30px' } },
+                        React.createElement(CardHeader, null,
+                            React.createElement(CardTitle, null, '⭐ Rating Components'),
+                            React.createElement(CardDescription, null, 'Interactive rating system with React Aria')
+                        ),
+                        React.createElement(CardContent, null,
+                            React.createElement('div', { style: { display: 'grid', gap: '20px' } },
+                                
+                                // Interactive Rating
+                                React.createElement('div', null,
+                                    React.createElement('h4', null, 'Interactive Rating (Click to rate)'),
+                                    React.createElement(Rating, {
+                                        value: currentRating,
+                                        onChange: setCurrentRating
+                                    },
+                                        React.createElement(Stars, null,
+                                            [1, 2, 3, 4, 5].map(value => 
+                                                React.createElement(Star, { key: value, value })
+                                            )
+                                        )
+                                    ),
+                                    React.createElement('p', null, `Current rating: ${currentRating}/5`)
+                                ),
+
+                                // Display Rating
+                                React.createElement('div', null,
+                                    React.createElement('h4', null, 'Display Rating (Read-only)'),
+                                    React.createElement(RatingDisplay, { value: 4.5 },
+                                        React.createElement(Stars, null,
+                                            [1, 2, 3, 4, 5].map(value => 
+                                                React.createElement(Star, { key: value, value })
+                                            )
+                                        ),
+                                        React.createElement(RatingCount, null, '(128 reviews)')
+                                    )
+                                ),
+
+                                // Half Star Rating
+                                React.createElement('div', null,
+                                    React.createElement('h4', null, 'Half Star Precision'),
+                                    React.createElement(RatingDisplay, { value: 3.7 },
+                                        React.createElement(Stars, { precision: 0.5 },
+                                            [1, 2, 3, 4, 5].map(value => 
+                                                React.createElement(Star, { key: value, value })
+                                            )
+                                        ),
+                                        React.createElement(RatingCount, null, '(64 reviews)')
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    // Button Components Section
+                    React.createElement(Card, { style: { marginBottom: '30px' } },
+                        React.createElement(CardHeader, null,
+                            React.createElement(CardTitle, null, '🔘 Button Components'),
+                            React.createElement(CardDescription, null, 'Headless buttons with React Aria interactions')
+                        ),
+                        React.createElement(CardContent, null,
+                            React.createElement('div', { 
+                                style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } 
+                            },
+                                React.createElement(Button, {
+                                    variant: 'primary',
+                                    onPress: () => alert('Primary button clicked!')
+                                }, 'Primary Button'),
+                                
+                                React.createElement(Button, {
+                                    variant: 'secondary',
+                                    onPress: () => alert('Secondary button clicked!')
+                                }, 'Secondary Button'),
+                                
+                                React.createElement(Button, {
+                                    variant: 'ghost',
+                                    isLoading: true
+                                }, 'Loading...'),
+                                
+                                React.createElement(Button, {
+                                    variant: 'primary',
+                                    isDisabled: true
+                                }, 'Disabled')
+                            )
+                        )
+                    ),
+
+                    // Review Components Section
+                    React.createElement(Card, { style: { marginBottom: '30px' } },
+                        React.createElement(CardHeader, null,
+                            React.createElement(CardTitle, null, '💬 Review Components'),
+                            React.createElement(CardDescription, null, 'Individual review display with all features')
+                        ),
+                        React.createElement(CardContent, null,
+                            React.createElement(Review, null,
+                                React.createElement(ReviewAvatar, {
+                                    src: 'https://ui-avatars.com/api/?name=Sarah+Johnson&background=dc3545&color=fff',
+                                    alt: 'Sarah Johnson'
+                                }),
+                                React.createElement('div', null,
+                                    React.createElement(ReviewAuthor, null, 'Sarah Johnson'),
+                                    React.createElement(ReviewTitle, null, 'Excellent quality and fast shipping!'),
+                                    React.createElement(ReviewRating, null,
+                                        React.createElement(RatingDisplay, { value: 5 },
+                                            React.createElement(Stars, null,
+                                                [1, 2, 3, 4, 5].map(value => 
+                                                    React.createElement(Star, { key: value, value })
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    React.createElement(ReviewContent, null,
+                                        "I'm really impressed with this product. The quality is outstanding and it arrived much faster than expected. Will definitely order again!"
+                                    ),
+                                    React.createElement(ReviewDate, null, 'January 15, 2025'),
+                                    React.createElement(ReviewActions, null,
+                                        React.createElement(ReviewHelpfulButton, {
+                                            onPress: () => alert('Marked as helpful!')
+                                        }, '👍 Helpful (15)'),
+                                        React.createElement(Button, {
+                                            variant: 'ghost',
+                                            size: 'sm'
+                                        }, 'Reply')
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    // Reviews List Section
+                    React.createElement(Card, { style: { marginBottom: '30px' } },
+                        React.createElement(CardHeader, null,
+                            React.createElement(CardTitle, null, '📝 Reviews List'),
+                            React.createElement(CardDescription, null, 'Complete reviews management system')
+                        ),
+                        React.createElement(CardContent, null,
+                            React.createElement(ReviewsList, null,
+                                React.createElement(ReviewsListHeader, null,
+                                    React.createElement('h3', null, `Customer Reviews (${reviews.length})`),
+                                    React.createElement('div', {
+                                        style: { display: 'flex', alignItems: 'center', gap: '10px' }
+                                    },
+                                        React.createElement(RatingDisplay, { value: 4.2 },
+                                            React.createElement(Stars, null,
+                                                [1, 2, 3, 4, 5].map(value => 
+                                                    React.createElement(Star, { key: value, value })
+                                                )
+                                            )
+                                        ),
+                                        React.createElement('span', null, '4.2 out of 5')
+                                    )
+                                ),
+                                
+                                React.createElement(ReviewsListItems, null,
+                                    reviews.map(review => 
+                                        React.createElement(Review, { key: review.id },
+                                            React.createElement(ReviewAvatar, {
+                                                src: review.avatar,
+                                                alt: review.author
+                                            }),
+                                            React.createElement('div', null,
+                                                React.createElement(ReviewAuthor, null, review.author),
+                                                React.createElement(ReviewTitle, null, review.title),
+                                                React.createElement(ReviewRating, null,
+                                                    React.createElement(RatingDisplay, { value: review.rating },
+                                                        React.createElement(Stars, null,
+                                                            [1, 2, 3, 4, 5].map(value => 
+                                                                React.createElement(Star, { key: value, value })
+                                                            )
+                                                        )
+                                                    )
+                                                ),
+                                                React.createElement(ReviewContent, null, review.content),
+                                                React.createElement(ReviewDate, null, review.date),
+                                                React.createElement(ReviewActions, null,
+                                                    React.createElement(ReviewHelpfulButton, null,
+                                                        `👍 Helpful (${review.helpful})`
+                                                    ),
+                                                    review.verified && React.createElement('span', {
+                                                        style: { 
+                                                            color: '#198754', 
+                                                            fontSize: '14px', 
+                                                            fontWeight: '500' 
+                                                        }
+                                                    }, '✅ Verified Purchase')
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    // Review Form Section
+                    React.createElement(Card, null,
+                        React.createElement(CardHeader, null,
+                            React.createElement(CardTitle, null, '✍️ Review Form'),
+                            React.createElement(CardDescription, null, 'Add a new review with validation')
+                        ),
+                        React.createElement(CardContent, null,
+                            React.createElement(ReviewForm, { onSubmit: handleNewReview },
+                                React.createElement(ReviewFormField, null,
+                                    React.createElement(ReviewFormLabel, { htmlFor: 'name' }, 'Your Name *'),
+                                    React.createElement(ReviewFormInput, {
+                                        id: 'name',
+                                        name: 'name',
+                                        required: true,
+                                        placeholder: 'Enter your full name'
+                                    })
+                                ),
+
+                                React.createElement(ReviewFormField, null,
+                                    React.createElement(ReviewFormLabel, { htmlFor: 'email' }, 'Email *'),
+                                    React.createElement(ReviewFormInput, {
+                                        id: 'email',
+                                        name: 'email',
+                                        type: 'email',
+                                        required: true,
+                                        placeholder: 'your@email.com'
+                                    })
+                                ),
+
+                                React.createElement(ReviewFormField, null,
+                                    React.createElement(ReviewFormLabel, { htmlFor: 'title' }, 'Review Title *'),
+                                    React.createElement(ReviewFormInput, {
+                                        id: 'title',
+                                        name: 'title',
+                                        required: true,
+                                        placeholder: 'Summarize your experience'
+                                    })
+                                ),
+
+                                React.createElement(ReviewFormField, null,
+                                    React.createElement(ReviewFormLabel, null, 'Rating *'),
+                                    React.createElement(ReviewFormRatingInput, {
+                                        name: 'rating',
+                                        required: true
+                                    })
+                                ),
+
+                                React.createElement(ReviewFormField, null,
+                                    React.createElement(ReviewFormLabel, { htmlFor: 'content' }, 'Your Review *'),
+                                    React.createElement(ReviewFormTextarea, {
+                                        id: 'content',
+                                        name: 'content',
+                                        required: true,
+                                        placeholder: 'Share your detailed experience...',
+                                        rows: 4
+                                    })
+                                ),
+
+                                React.createElement(ReviewFormSubmit, null, 'Submit Review')
+                            )
+                        )
+                    ),
+
+                    // Footer
+                    React.createElement('footer', {
+                        style: { 
+                            textAlign: 'center', 
+                            marginTop: '40px', 
+                            padding: '20px',
+                            color: '#6c757d',
+                            borderTop: '1px solid #dee2e6'
+                        }
+                    },
+                        React.createElement('p', null,
+                            '🎉 All components are ',
+                            React.createElement('strong', null, 'headless'),
+                            ', ',
+                            React.createElement('strong', null, 'accessible'),
+                            ', and ready for your custom styling!'
+                        ),
+                        React.createElement('p', null,
+                            React.createElement('strong', null, 'Bundle size:'),
+                            ' ~51KB | ',
+                            React.createElement('strong', null, 'Components:'),
+                            ' 30+ | ',
+                            React.createElement('strong', null, 'React Aria:'),
+                            ' ✅ | ',
+                            React.createElement('strong', null, 'TypeScript:'),
+                            ' ✅'
+                        )
+                    )
+                )
+            );
+        }
+
+        // Render the demo
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(React.createElement(DemoApp));
+    </script>
+</body>
+</html> 
