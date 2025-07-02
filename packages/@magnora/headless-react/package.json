@@ -10,6 +10,7 @@
     "src",
     "README.md"
   ],
+  "sideEffects": false,
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

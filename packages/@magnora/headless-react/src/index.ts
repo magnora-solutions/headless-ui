@@ -1,6 +1,7 @@
 // Core providers
 export * from './providers/magnora-provider';
 export * from './providers/shopify-provider';
+export { useShopifyShop, useCurrentProductId } from './providers/shopify-provider';
 
 // Rating components
 export * from './components/rating/rating';
@@ -29,4 +30,5 @@ export type {
   ShopifyConfig,
   ShopifyReview,
   ShopifyProduct,
-} from './providers/shopify-provider'; 
+  ShopifyShop,
+} from './providers/shopify-provider';

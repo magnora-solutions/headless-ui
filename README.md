@@ -2,6 +2,8 @@
 
 A comprehensive Shopify review system with admin app and headless components, designed for "Build for Shopify" certification and plug-and-play integration.
 
+Detailed implementation guides can now be found in the `docs/` directory.
+
 ## 🚀 What We've Built
 
 Based on the call requirements, we've transformed from a simple headless UI library into a full Shopify ecosystem:
@@ -15,9 +17,12 @@ Based on the call requirements, we've transformed from a simple headless UI libr
 - **Pagination**: NEW - Full pagination system with React Aria
 - **Review Form**: Modular field components as requested
 - **Reviews List**: Filtering, sorting, search functionality
+- **Categories**: Simple category selector with React Aria
+- **Slide to Confirm**: Interactive confirmation slider
 
-#### 2. **Shopify Provider System** 
+#### 2. **Shopify Provider System**
 - **Auto-detection**: Automatically detects Hydrogen vs non-Hydrogen stores
+  (checks `__HYDROGEN__`, `__HYDROGEN_DEV__`, and meta tags)
 - **Plug-and-play**: Zero API coding needed - just pass Product ID
 - **Data Caching**: 5-minute cache with automatic invalidation
 - **Error Handling**: Comprehensive error states and retry logic
@@ -64,6 +69,8 @@ import { ShopifyProvider, CardReview, ReviewsList, Pagination } from '@magnora/h
   <CardReview productId="gid://shopify/Product/123" />
 </ShopifyProvider>
 ```
+// The provider can also be used outside of Shopify to connect with any custom
+// backend that follows the same API shape.
 
 ### Customizable Stars (No Default Styling)
 ```jsx
@@ -146,6 +153,8 @@ npx @shopify/cli@latest app init shopify-admin
 **Current Headless Components:**
 - **Total Size**: ~51KB (extremely lightweight!)
 - **Lines of Code**: ~1,092 lines
+- **Tree-shakable**: ESM exports with `sideEffects: false`
+- **Lean state management**: Removed heavy `useMemo` patterns for optimal bundling
 - **Components**: 29 tested components
 - **React Aria**: Professional interactions included
 

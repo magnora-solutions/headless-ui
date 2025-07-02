@@ -106,13 +106,13 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       onMouseUp?.(event)
     }, [onMouseUp])
 
-    const contextValue = React.useMemo<CardContextValue>(() => ({
+    const contextValue: CardContextValue = {
       variant,
       interactive,
       isHovered,
       isFocused,
       isPressed,
-    }), [variant, interactive, isHovered, isFocused, isPressed])
+    }
 
     return (
       <CardContext.Provider value={contextValue}>
