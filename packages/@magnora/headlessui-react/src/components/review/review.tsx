@@ -70,9 +70,7 @@ export function useReview() {
 // Main Review Component
 export const Review = React.forwardRef<HTMLDivElement, ReviewProps>(
   ({ review, children, ...props }, ref) => {
-    const contextValue = React.useMemo(() => ({
-      review,
-    }), [review])
+    const contextValue = { review }
 
     return (
       <ReviewContext.Provider value={contextValue}>

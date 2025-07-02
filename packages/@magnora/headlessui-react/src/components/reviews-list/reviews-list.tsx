@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useMemo } from 'react'
+import React, { createContext, useContext } from 'react'
 import type { ReviewData } from '../review/review'
 
 // Types for reviews list system
@@ -151,7 +151,7 @@ export const ReviewsList = React.forwardRef<HTMLDivElement, ReviewsListProps>(
     children,
     ...props 
   }, ref) => {
-    const filteredReviews = useMemo(() => {
+    const filteredReviews = (() => {
       let filtered = [...data.reviews]
 
       // Apply search filter
@@ -201,9 +201,9 @@ export const ReviewsList = React.forwardRef<HTMLDivElement, ReviewsListProps>(
       }
 
       return filtered
-    }, [data.reviews, searchQuery, filterBy, sortBy])
+    })()
 
-    const contextValue = useMemo<ReviewsListContextValue>(() => ({
+    const contextValue: ReviewsListContextValue = {
       data,
       sortBy,
       filterBy,
@@ -215,7 +215,7 @@ export const ReviewsList = React.forwardRef<HTMLDivElement, ReviewsListProps>(
       onFilterChange,
       onSearchChange,
       onLoadMore,
-    }), [data, sortBy, filterBy, searchQuery, filteredReviews, loading, hasMore, onSortChange, onFilterChange, onSearchChange, onLoadMore])
+    }
 
     return (
       <ReviewsListContext.Provider value={contextValue}>

@@ -30,6 +30,13 @@ export interface ShopifyProduct {
   reviewCount: number;
 }
 
+export interface ShopifyShop {
+  id: string;
+  name: string;
+  contactEmail?: string;
+  contactPhone?: string;
+}
+
 interface ShopifyContextType {
   config: ShopifyConfig;
   isHydrogenStore: boolean;
@@ -40,6 +47,8 @@ interface ShopifyContextType {
   // Data fetching methods
   getReviews: (productId: string, options?: GetReviewsOptions) => Promise<ShopifyReview[]>;
   getProduct: (productId: string) => Promise<ShopifyProduct>;
+  getShop: () => Promise<ShopifyShop>;
+  getCurrentProductId: () => string | null;
   submitReview: (review: Partial<ShopifyReview>) => Promise<ShopifyReview>;
   
   // Cache management
@@ -63,12 +72,16 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 // Auto-detect if running in Shopify Hydrogen
 function detectHydrogenEnvironment(): boolean {
   if (typeof window === 'undefined') return false;
-  
-  // Check for Hydrogen-specific globals
-  return !!(
-    (window as any).Shopify?.shop ||
-    (window as any).__HYDROGEN__ ||
-    document.querySelector('meta[name="shopify-shop-id"]')
+
+  const globalAny = window as any;
+
+  return Boolean(
+    globalAny.Shopify?.shop ||
+    globalAny.__HYDROGEN__ ||
+    globalAny.__HYDROGEN_DEV__ ||
+    globalAny.__HYDROGEN_SERVER__ ||
+    document.querySelector('meta[name="shopify-shop-id"]') ||
+    document.querySelector('meta[name="hydrogen-shop-id"]')
   );
 }
 
@@ -81,8 +94,10 @@ function extractShopId(): string | null {
     return (window as any).Shopify.shop;
   }
 
-  // Try meta tag
-  const metaTag = document.querySelector('meta[name="shopify-shop-id"]');
+  // Try meta tags
+  const metaTag =
+    document.querySelector('meta[name="shopify-shop-id"]') ||
+    document.querySelector('meta[name="hydrogen-shop-id"]');
   if (metaTag) {
     return metaTag.getAttribute('content');
   }
@@ -217,6 +232,41 @@ export function ShopifyProvider({ children, config = {} }: ShopifyProviderProps)
     }
   };
 
+  const getShop = async (): Promise<ShopifyShop> => {
+    const cacheKey = 'shop-info';
+    const cached = getCachedData<ShopifyShop>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const apiUrl = config.apiUrl || '/api/shop';
+      const response = await fetch(`${apiUrl}?shopId=${shopId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(config.apiKey && { Authorization: `Bearer ${config.apiKey}` }),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch shop info: ${response.statusText}`);
+      }
+
+      const shop = await response.json();
+      setCachedData(cacheKey, shop);
+      return shop;
+    } catch (err) {
+      console.error('Error fetching shop info:', err);
+      throw err;
+    }
+  };
+
+  const getCurrentProductId = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    const meta = document.querySelector('meta[name="shopify-product-id"]');
+    if (meta) return meta.getAttribute('content');
+    const el = document.querySelector('[data-product-id]');
+    return el ? el.getAttribute('data-product-id') : null;
+  };
+
   const submitReview = async (review: Partial<ShopifyReview>): Promise<ShopifyReview> => {
     try {
       const apiUrl = config.apiUrl || '/api/reviews';
@@ -276,6 +326,8 @@ export function ShopifyProvider({ children, config = {} }: ShopifyProviderProps)
     error,
     getReviews,
     getProduct,
+    getShop,
+    getCurrentProductId,
     submitReview,
     clearCache,
     refreshReviews,
@@ -301,6 +353,35 @@ export function useShopify(): ShopifyContextType {
   }
   
   return context;
+}
+
+export function useShopifyShop() {
+  const { getShop } = useShopify();
+  const [shop, setShop] = useState<ShopifyShop | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsLoading(true);
+    setError(null);
+    getShop()
+      .then(setShop)
+      .catch((err) => setError(err.message))
+      .finally(() => setIsLoading(false));
+  }, [getShop]);
+
+  return { shop, isLoading, error };
+}
+
+export function useCurrentProductId() {
+  const { getCurrentProductId } = useShopify();
+  const [productId, setProductId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setProductId(getCurrentProductId());
+  }, [getCurrentProductId]);
+
+  return productId;
 }
 
 // Hook for fetching reviews with automatic loading states

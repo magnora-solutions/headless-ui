@@ -1,8 +1,8 @@
-/shelf/
-/.idea/workspace.xml
-/httpRequests/
-/dataSources/
-/dataSources.local.xml
 node_modules/
-.idea/
 dist/
+.shelf/
+.idea/
+httpRequests/
+.dataSources/
+.dataSources.local.xml
+coverage/

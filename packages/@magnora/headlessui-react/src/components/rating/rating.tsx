@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useMemo } from 'react'
+import React, { createContext, useContext } from 'react'
 import { useHover, usePress } from '@react-aria/interactions'
 import type { PressEvent, HoverEvent } from '@react-types/shared'
 
@@ -90,7 +90,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
       onLeave?.()
     }, [readonly, onLeave])
 
-    const contextValue = useMemo<RatingContextValue>(() => ({
+    const contextValue: RatingContextValue = {
       value,
       maxRating,
       hoveredValue,
@@ -99,7 +99,7 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
       onChange,
       onHover: handleStarHover,
       onLeave: handleMouseLeave,
-    }), [value, maxRating, hoveredValue, readonly, precision, onChange, handleStarHover, handleMouseLeave])
+    }
 
     return (
       <RatingContext.Provider value={contextValue}>
@@ -125,13 +125,13 @@ Rating.displayName = 'Rating'
 // Display-only Rating Component
 export const RatingDisplay = React.forwardRef<HTMLDivElement, RatingDisplayProps>(
   ({ value, totalReviews, maxRating = 5, precision = 'half', children, ...props }, ref) => {
-    const contextValue = useMemo<RatingContextValue>(() => ({
+    const contextValue: RatingContextValue = {
       value,
       maxRating,
       hoveredValue: null,
       readonly: true,
       precision,
-    }), [value, maxRating, precision])
+    }
 
     return (
       <RatingContext.Provider value={contextValue}>
@@ -176,21 +176,21 @@ export const Star = React.forwardRef<HTMLButtonElement, StarProps>(
       onHoverEnd?.()
     }, [readonly, contextOnLeave, onHoverEnd])
 
-    const fillPercentage = useMemo(() => {
-      const { value, hoveredValue, precision } = context
-      const currentValue = hoveredValue ?? value
-      const starValue = index + 1
+    const { value: ctxValue, hoveredValue, precision } = context
+    const currentValue = hoveredValue ?? ctxValue
+    const starValue = index + 1
 
-      if (currentValue >= starValue) return 100
-      if (currentValue < index + 1) return 0
-      
+    let fillPercentage = 0
+
+    if (currentValue >= starValue) fillPercentage = 100
+    else if (currentValue > index) {
       if (precision === 'half') {
         const remainder = currentValue - index
-        return remainder >= 0.5 ? 50 : 0
+        fillPercentage = remainder >= 0.5 ? 50 : 0
+      } else {
+        fillPercentage = Math.round((currentValue - index) * 100)
       }
-      
-      return Math.round((currentValue - index) * 100)
-    }, [context, index])
+    }
 
     // React Aria hooks for better interaction handling
     const { hoverProps } = useHover({

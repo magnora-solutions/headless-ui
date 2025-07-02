@@ -240,7 +240,7 @@ export const ReviewForm = React.forwardRef<HTMLFormElement, ReviewFormProps>(
       }
     }, [state.data, onSubmit, onValidate, requireTerms])
 
-    const contextValue = React.useMemo<ReviewFormContextValue>(() => ({
+    const contextValue: ReviewFormContextValue = {
       state,
       dispatch,
       maxMediaFiles,
@@ -248,7 +248,7 @@ export const ReviewForm = React.forwardRef<HTMLFormElement, ReviewFormProps>(
       allowedMediaTypes,
       requireTerms,
       onValidate,
-    }), [state, maxMediaFiles, maxMediaSize, allowedMediaTypes, requireTerms, onValidate])
+    }
 
     return (
       <ReviewFormContext.Provider value={contextValue}>

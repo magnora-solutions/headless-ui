@@ -18,3 +18,7 @@ export * from './components/review-form/review-form'
 
 // Provider
 export * from './providers/magnora-provider'
+
+// Categories & confirmation components
+export * from './components/categories/categories'
+export * from './components/slide-confirm/slide-confirm'
